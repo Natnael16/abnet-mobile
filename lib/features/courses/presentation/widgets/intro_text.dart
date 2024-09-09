@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/colors.dart';
 
 class IntroText extends StatelessWidget {
-  const IntroText({super.key, required this.title});
+  const IntroText({super.key, required this.title,});
   final String title;
   @override
   Widget build(BuildContext context) {

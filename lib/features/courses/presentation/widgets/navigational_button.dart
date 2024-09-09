@@ -5,11 +5,13 @@ import '../../../../core/utils/colors.dart';
 class NavigationalButton extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;
+  Widget? suffix;
 
-  const NavigationalButton({
+  NavigationalButton({
     super.key,
     required this.title,
     required this.onPressed,
+    this.suffix,
   });
 
   @override
@@ -21,8 +23,7 @@ class NavigationalButton extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         decoration: BoxDecoration(
           color: AppColors.defaultGrey,
-          borderRadius: BorderRadius.circular(8), 
-          
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -34,10 +35,9 @@ class NavigationalButton extends StatelessWidget {
                 color: AppColors.textBlack,
               ),
             ),
-             Icon(
-              Icons.chevron_right, 
+            suffix ?? Icon(
+              Icons.chevron_right,
               color: Colors.grey[400],
-           
             ),
           ],
         ),

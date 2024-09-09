@@ -1,3 +1,5 @@
+import 'media.dart';
+
 class Topic {
   final int id;
   final String createdAt;
@@ -5,15 +7,18 @@ class Topic {
   final String description;
   final int? superTopicId; // Nullable field
   final int? teacherCourseId; // Nullable field
+  bool isTopicFinal;
+  Media? media;
 
-  Topic({
-    required this.id,
-    required this.createdAt,
-    required this.title,
-    required this.description,
-    this.superTopicId,
-    this.teacherCourseId,
-  });
+  Topic(
+      {required this.id,
+      required this.createdAt,
+      required this.title,
+      required this.description,
+      this.superTopicId,
+      this.teacherCourseId,
+      this.isTopicFinal = false,
+      this.media});
 
   // Factory method to create an instance from a map (for JSON parsing)
   factory Topic.fromJson(Map<String, dynamic> json) {
@@ -21,7 +26,7 @@ class Topic {
       id: json['id'],
       createdAt: json['created_at'],
       title: json['title'],
-      description: json['description'],
+      description: json['description'] ?? '',
       superTopicId: json['super_topic_id'],
       teacherCourseId: json['teacher_course_id'],
     );

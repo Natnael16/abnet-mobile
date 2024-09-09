@@ -18,7 +18,7 @@ class CustomRoundButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 33.w,
+        width: 50.w,
         height: 5.h,
         padding: EdgeInsets.symmetric(horizontal: (4).w),
         decoration: BoxDecoration(

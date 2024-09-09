@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routes/paths.dart';
 import '../../../../core/shared_widgets/custom_textfield.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../../../core/utils/images.dart';
-import '../../data/models/course.dart';
 import '../../data/models/teacher.dart';
-import '../bloc/course/course_bloc.dart';
 import '../bloc/teachers/teachers_bloc.dart';
 import '../widgets/intro_text.dart';
 import '../widgets/navigational_button.dart';
@@ -50,7 +50,8 @@ class _TeachersPageState extends State<TeachersPage> {
               SearchTextField(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(right: 6.0),
-                    child: SvgPicture.asset(AppImages.searchIcon,width:22,height:22),
+                    child: SvgPicture.asset(AppImages.searchIcon,
+                        width: 22, height: 22),
                   ),
                   controller: searchController),
               const SizedBox(height: 16),
@@ -73,9 +74,12 @@ class _TeachersPageState extends State<TeachersPage> {
                         return NavigationalButton(
                           title: teacher.name, // Use course title
                           onPressed: () {
-                            // Handle button press, e.g., navigate to course detail page
-                            print("Teacher ID:  ${teacher.id}");
-                          
+                            context.push(AppPaths.topics, extra: {
+                              'courseId': widget.courseId,
+                              "title": teacher.name,
+                              "teacherId": teacher.id,
+                            });
+
                             // Add your navigation logic here
                           },
                         );
@@ -83,7 +87,10 @@ class _TeachersPageState extends State<TeachersPage> {
                     );
                   }
                   return NoDataReload(
-                    onPressed: () {},
+                    onPressed: () {
+                      BlocProvider.of<TeachersBloc>(context)
+                          .add(GetTeachersEvent(courseId: widget.courseId));
+                    },
                   );
                 },
               )

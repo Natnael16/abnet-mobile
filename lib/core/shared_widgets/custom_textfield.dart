@@ -20,17 +20,17 @@ class SearchTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
 
       decoration: BoxDecoration(
-        color: AppColors.defaultGrey, // Slightly transparent gray
+        color: AppColors.defaultGrey,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(color: AppColors.defaultGrey),
+          hintStyle: const TextStyle(color: Colors.grey),
           prefixIcon: prefixIcon ?? const Icon(Icons.search, color: AppColors.primaryColor),
           border: InputBorder.none,
         ),

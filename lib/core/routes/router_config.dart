@@ -3,8 +3,10 @@ import 'package:abnet_mobile/features/courses/presentation/screens/courses.dart'
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/courses/presentation/screens/teachers.dart';
+import '../../features/courses/presentation/screens/topics.dart';
 import '../../features/splash/splash_screen.dart';
 import '../utils/theme.dart';
+
 class AppRouter extends StatelessWidget {
   static final GoRouter _router = GoRouter(
     initialLocation: AppPaths.splash,
@@ -24,8 +26,14 @@ class AppRouter extends StatelessWidget {
           builder: (BuildContext context, GoRouterState state) {
             var extra = state.extra as Map<String, dynamic>;
             return TeachersPage(
-                courseId: extra['courseId'],
-                courseTitle: extra['courseTitle']);
+                courseId: extra['courseId'], courseTitle: extra['courseTitle']);
+          }),
+      GoRoute(
+          path: AppPaths.topics,
+          builder: (BuildContext context, GoRouterState state) {
+            var extra = state.extra as Map<String, dynamic>;
+            return TopicsPage(
+                courseId: extra['courseId'], title: extra['title'], teacherId: extra['teacherId'], superTopicId: extra['superTopicId']);
           }),
     ],
   );

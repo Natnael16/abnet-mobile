@@ -9,6 +9,7 @@ import 'core/routes/router_config.dart';
 import 'core/utils/bloc_observer.dart';
 import 'features/courses/presentation/bloc/course/course_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
+import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
 
 void main() async {
   await dotenv.load();
@@ -23,9 +24,10 @@ void main() async {
       return MultiBlocProvider(
         providers: [
            BlocProvider<CourseBloc>(create: (_) => CourseBloc()),
-           BlocProvider<TeachersBloc>(create: (_) => TeachersBloc())
+           BlocProvider<TeachersBloc>(create: (_) => TeachersBloc()),
+           BlocProvider<TopicsBloc>(create: (_) => TopicsBloc()),
         ],
-        child: const MyApp(),
+        child: MyApp(),
       );
     },
   ));

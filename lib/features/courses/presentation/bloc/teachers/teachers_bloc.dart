@@ -12,13 +12,17 @@ class TeachersBloc extends Bloc<TeachersEvent, TeachersState> {
     on<GetTeachersEvent>(
         (GetTeachersEvent event, Emitter<TeachersState> emit) async {
       emit(TeachersLoading());
-      List<Teacher> teachers =
-          await getCourseTeachers(event.courseId, event.query);
-      if (teachers.isEmpty) {
-        emit(const TeachersFailure(errorMessage: 'No Teachers found.'));
-        return;
+      try {
+        List<Teacher> teachers =
+            await getCourseTeachers(event.courseId, event.query);
+        if (teachers.isEmpty) {
+          emit(const TeachersFailure(errorMessage: 'No Teachers found.'));
+          return;
+        }
+        emit(TeachersSuccess(teachers: teachers));
+      } catch (e) {
+        emit(TeachersFailure(errorMessage: 'Error occured $e'));
       }
-      emit(TeachersSuccess(teachers: teachers));
     });
   }
 }
@@ -41,7 +45,7 @@ Future<List<Teacher>> getCourseTeachers(int courseId, String? query) async {
     return [];
   }
   List<Teacher> teachers = [];
-  for (var teach in response){
+  for (var teach in response) {
     if (query == null || teach['teacher']['name'].contains(query)) {
       teachers.add(Teacher.fromJson(teach['teacher']));
     }

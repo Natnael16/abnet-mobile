@@ -59,7 +59,6 @@ class _CoursesPageState extends State<CoursesPage> {
                         return NavigationalButton(
                           title: course.title, // Use course title
                           onPressed: () {
-                            print("Course ID: ${course.id}");
                             context.push(AppPaths.teachers, extra: {
                               'courseId': course.id,
                               "courseTitle": course.title
@@ -71,7 +70,10 @@ class _CoursesPageState extends State<CoursesPage> {
                     );
                   }
                   return NoDataReload(
-                    onPressed: () {},
+                    onPressed: () {
+                      BlocProvider.of<CourseBloc>(context)
+                          .add(GetCoursesEvent());
+                    },
                   );
                 },
               )
