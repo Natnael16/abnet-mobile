@@ -49,6 +49,7 @@ dependencies:
   dartz: ^0.10.1
   flutter_dotenv: ^5.1.0
   bloc: ^8.1.4
+  just_audio: ^0.9.40
 
 dev_dependencies:
   flutter_test:

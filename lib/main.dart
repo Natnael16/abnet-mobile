@@ -10,6 +10,7 @@ import 'core/utils/bloc_observer.dart';
 import 'features/courses/presentation/bloc/course/course_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
 import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
+import 'features/courses/presentation/widgets/persistent_bottom_sheet.dart';
 
 void main() async {
   await dotenv.load();
@@ -32,8 +33,11 @@ void main() async {
     },
   ));
 }
+//Global variables
 
 final supabase = Supabase.instance.client;
+final FloatingAudioPlayer audioPlayer = FloatingAudioPlayer();
+
 
 final isLoggedIn =
     supabase.auth.currentSession != null; // Retrieve the current session data

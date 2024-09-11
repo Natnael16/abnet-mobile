@@ -12,8 +12,6 @@ class TopicsBloc extends Bloc<TopicsEvent, TopicsState> {
     on<GetTopicsEvent>((event, emit) async {
       emit(TopicsLoading());
       try {
-        print(
-            "payloads : ${event.courseId} - ${event.superTopicId} - ${event.teacherId}");
         List<Topic> topics = await getTopics(
             event.courseId, event.teacherId, event.superTopicId);
         if (topics.isEmpty) {

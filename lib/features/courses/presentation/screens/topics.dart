@@ -7,10 +7,12 @@ import '../../../../core/shared_widgets/custom_textfield.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../../../core/utils/colors.dart';
 import '../../../../core/utils/images.dart';
+import '../../../../main.dart';
 import '../../data/models/topic.dart';
 import '../bloc/topics/topics_bloc.dart';
 import '../widgets/intro_text.dart';
 import '../widgets/navigational_button.dart';
+import '../widgets/persistent_bottom_sheet.dart';
 import '../widgets/shimmer_list.dart';
 
 class TopicsPage extends StatefulWidget {
@@ -40,12 +42,9 @@ class _TopicsPageState extends State<TopicsPage> {
         superTopicId: widget.superTopicId));
   }
 
-  @override
-  dispose() {
-    super.dispose();
-  }
-
   TextEditingController searchController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -56,6 +55,7 @@ class _TopicsPageState extends State<TopicsPage> {
           superTopicId: widget.superTopicId,
         )),
       child: Scaffold(
+          key: _scaffoldKey,
           appBar: AppBar(
             title: const Text("ረቡኒ",
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
@@ -107,7 +107,10 @@ class _TopicsPageState extends State<TopicsPage> {
                                 : null,
                             onPressed: () {
                               if (topic.isTopicFinal) {
-                                print(topic.media);
+                                // BottomSheetManager().showBottomSheet();
+                                // showFloatingWidget(context,topic.media?.audioUrl ?? '');
+                                audioPlayer.showFloatingWidget(
+                                    context, topic.media?.audioUrl ?? '');
                               } else {
                                 context.push(AppPaths.topics, extra: {
                                   'courseId': widget.courseId,
