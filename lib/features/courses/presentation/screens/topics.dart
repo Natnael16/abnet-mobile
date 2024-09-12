@@ -9,7 +9,9 @@ import '../../../../core/utils/colors.dart';
 import '../../../../core/utils/images.dart';
 import '../../../../main.dart';
 import '../../data/models/topic.dart';
+import '../bloc/media/media_bloc.dart';
 import '../bloc/topics/topics_bloc.dart';
+import '../widgets/floating_player.dart';
 import '../widgets/intro_text.dart';
 import '../widgets/navigational_button.dart';
 import '../widgets/persistent_bottom_sheet.dart';
@@ -109,8 +111,11 @@ class _TopicsPageState extends State<TopicsPage> {
                               if (topic.isTopicFinal) {
                                 // BottomSheetManager().showBottomSheet();
                                 // showFloatingWidget(context,topic.media?.audioUrl ?? '');
-                                audioPlayer.showFloatingWidget(
-                                    context, topic.media?.audioUrl ?? '');
+                                // audioPlayer.showFloatingWidget(
+                                //     context, topic.media?.audioUrl ?? '');
+                                context
+                                    .read<AudioBloc>()
+                                    .add(PlayAudio(topic.media!.audioUrl!));
                               } else {
                                 context.push(AppPaths.topics, extra: {
                                   'courseId': widget.courseId,
@@ -136,7 +141,10 @@ class _TopicsPageState extends State<TopicsPage> {
                 )
               ],
             ),
-          )),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingAudioPlayer(),
+          ),
     );
   }
 }

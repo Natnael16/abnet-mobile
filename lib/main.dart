@@ -8,9 +8,10 @@ import 'core/injections/injection_container.dart';
 import 'core/routes/router_config.dart';
 import 'core/utils/bloc_observer.dart';
 import 'features/courses/presentation/bloc/course/course_bloc.dart';
+import 'features/courses/presentation/bloc/media/media_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
 import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
-import 'features/courses/presentation/widgets/persistent_bottom_sheet.dart';
+
 
 void main() async {
   await dotenv.load();
@@ -27,6 +28,7 @@ void main() async {
            BlocProvider<CourseBloc>(create: (_) => CourseBloc()),
            BlocProvider<TeachersBloc>(create: (_) => TeachersBloc()),
            BlocProvider<TopicsBloc>(create: (_) => TopicsBloc()),
+           BlocProvider<AudioBloc>(create: (_) => AudioBloc())
         ],
         child: MyApp(),
       );
@@ -36,7 +38,7 @@ void main() async {
 //Global variables
 
 final supabase = Supabase.instance.client;
-final FloatingAudioPlayer audioPlayer = FloatingAudioPlayer();
+// final FloatingAudioPlayer audioPlayer = FloatingAudioPlayer();
 
 
 final isLoggedIn =
