@@ -98,8 +98,6 @@ class _TeachersPageState extends State<TeachersPage> {
             ],
           ),
         ),
-         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: const FloatingAudioPlayer(),
         );
   }
 }

@@ -109,9 +109,9 @@ class _TopicsPageState extends State<TopicsPage> {
                               : null,
                           onPressed: () {
                             if (topic.isTopicFinal) {
-                              context
-                                  .read<AudioBloc>()
-                                  .add(PlayAudio(topic.media!.audioUrl!));
+                                context.push(AppPaths.mediaPlayer, extra: {
+                                'media': topic.media,
+                              });
                             } else {
                               context.push(AppPaths.topics, extra: {
                                 'courseId': widget.courseId,
@@ -138,8 +138,6 @@ class _TopicsPageState extends State<TopicsPage> {
             ],
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: const FloatingAudioPlayer(),
       ),
     );
   }

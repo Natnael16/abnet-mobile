@@ -53,7 +53,6 @@ Future<List<Topic>> getTopics(int courseId, int teacherId, int? topicId) async {
           .select('*')
           .eq('super_topic_id', topicId);
     }
-    print('response: ');
     topics = [];
     for (var t in response) {
       var topic = Topic.fromJson(t);
@@ -64,10 +63,8 @@ Future<List<Topic>> getTopics(int courseId, int teacherId, int? topicId) async {
     }
 
     // Cache the fetched data
-    print('enoding');
     cacheBox.put(
         cacheKey, jsonEncode(topics.map((topic) => topic.toJson()).toList()));
-    print('ended');
   }
 
   return topics;
