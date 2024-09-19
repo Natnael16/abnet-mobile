@@ -57,94 +57,90 @@ class _TopicsPageState extends State<TopicsPage> {
           superTopicId: widget.superTopicId,
         )),
       child: Scaffold(
-          key: _scaffoldKey,
-          appBar: AppBar(
-            title: const Text("ረቡኒ",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
-            centerTitle: true,
-          ),
-          drawer: const Drawer(),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16),
-                IntroText(title: widget.title),
-                const SizedBox(height: 16),
-                SearchTextField(
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(right: 6.0),
-                      child: SvgPicture.asset(AppImages.searchIcon,
-                          width: 22, height: 22),
-                    ),
-                    controller: searchController),
-                const SizedBox(height: 16),
-                BlocConsumer<TopicsBloc, TopicsState>(
-                  listener: (context, state) {
-                    if (state is ClearTopicsState) {
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: const Text("ረቡኒ",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
+          centerTitle: true,
+        ),
+        drawer: const Drawer(),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 16),
+              IntroText(title: widget.title),
+              const SizedBox(height: 16),
+              SearchTextField(
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: SvgPicture.asset(AppImages.searchIcon,
+                        width: 22, height: 22),
+                  ),
+                  controller: searchController),
+              const SizedBox(height: 16),
+              BlocConsumer<TopicsBloc, TopicsState>(
+                listener: (context, state) {
+                  if (state is ClearTopicsState) {
+                    BlocProvider.of<TopicsBloc>(context).add(GetTopicsEvent(
+                        courseId: widget.courseId,
+                        teacherId: widget.teacherId,
+                        superTopicId: widget.superTopicId));
+                  }
+                },
+                builder: (context, state) {
+                  if (state is TopicsLoading) {
+                    return const ShimmerList();
+                  } else if (state is TopicsSuccess) {
+                    final List<Topic> topics = state.topics;
+
+                    return ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: topics.length,
+                      itemBuilder: (context, index) {
+                        final topic = topics[index];
+
+                        return NavigationalButton(
+                          title: topic.title,
+                          suffix: topic.isTopicFinal
+                              ? const Icon(Icons.play_circle_rounded,
+                                  color: AppColors.primaryColor, size: 30)
+                              : null,
+                          onPressed: () {
+                            if (topic.isTopicFinal) {
+                              context
+                                  .read<AudioBloc>()
+                                  .add(PlayAudio(topic.media!.audioUrl!));
+                            } else {
+                              context.push(AppPaths.topics, extra: {
+                                'courseId': widget.courseId,
+                                "title": topic.title,
+                                "teacherId": widget.teacherId,
+                                "superTopicId": topic.id,
+                              });
+                            }
+                          },
+                        );
+                      },
+                    );
+                  }
+                  return NoDataReload(
+                    onPressed: () {
                       BlocProvider.of<TopicsBloc>(context).add(GetTopicsEvent(
                           courseId: widget.courseId,
                           teacherId: widget.teacherId,
                           superTopicId: widget.superTopicId));
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is TopicsLoading) {
-                      return const ShimmerList();
-                    } else if (state is TopicsSuccess) {
-                      final List<Topic> topics = state.topics;
-
-                      return ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: topics.length,
-                        itemBuilder: (context, index) {
-                          final topic = topics[index];
-
-                          return NavigationalButton(
-                            title: topic.title,
-                            suffix: topic.isTopicFinal
-                                ? const Icon(Icons.play_circle_rounded,
-                                    color: AppColors.primaryColor, size: 30)
-                                : null,
-                            onPressed: () {
-                              if (topic.isTopicFinal) {
-                                // BottomSheetManager().showBottomSheet();
-                                // showFloatingWidget(context,topic.media?.audioUrl ?? '');
-                                // audioPlayer.showFloatingWidget(
-                                //     context, topic.media?.audioUrl ?? '');
-                                context
-                                    .read<AudioBloc>()
-                                    .add(PlayAudio(topic.media!.audioUrl!));
-                              } else {
-                                context.push(AppPaths.topics, extra: {
-                                  'courseId': widget.courseId,
-                                  "title": topic.title,
-                                  "teacherId": widget.teacherId,
-                                  "superTopicId": topic.id,
-                                });
-                              }
-                            },
-                          );
-                        },
-                      );
-                    }
-                    return NoDataReload(
-                      onPressed: () {
-                        BlocProvider.of<TopicsBloc>(context).add(GetTopicsEvent(
-                            courseId: widget.courseId,
-                            teacherId: widget.teacherId,
-                            superTopicId: widget.superTopicId));
-                      },
-                    );
-                  },
-                )
-              ],
-            ),
+                    },
+                  );
+                },
+              )
+            ],
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingAudioPlayer(),
-          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: const FloatingAudioPlayer(),
+      ),
     );
   }
 }

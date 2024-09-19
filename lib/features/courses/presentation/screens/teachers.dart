@@ -8,6 +8,7 @@ import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../../../core/utils/images.dart';
 import '../../data/models/teacher.dart';
 import '../bloc/teachers/teachers_bloc.dart';
+import '../widgets/floating_player.dart';
 import '../widgets/intro_text.dart';
 import '../widgets/navigational_button.dart';
 import '../widgets/shimmer_list.dart';
@@ -96,6 +97,9 @@ class _TeachersPageState extends State<TeachersPage> {
               )
             ],
           ),
-        ));
+        ),
+         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: const FloatingAudioPlayer(),
+        );
   }
 }

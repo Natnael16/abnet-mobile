@@ -4,18 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/media/media_bloc.dart';
 
 class FloatingAudioPlayer extends StatefulWidget {
+  const FloatingAudioPlayer({super.key});
+
   @override
-  _FloatingAudioPlayerState createState() => _FloatingAudioPlayerState();
+  FloatingAudioPlayerState createState() => FloatingAudioPlayerState();
 }
 
-class _FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
-  bool _isExpanded = false;
+class FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
+  bool _isExpanded = true;
+  bool _isClosing = false; // To prevent re-renders during close
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, audioState) {
-        if (audioState.currentAudioUrl == null) {
+        if (audioState.currentAudioUrl == null || _isClosing) {
           return const SizedBox.shrink();
         }
 
@@ -27,16 +30,15 @@ class _FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
             duration: const Duration(milliseconds: 300),
             height: _isExpanded
                 ? MediaQuery.of(context).size.height * 0.9
-                : MediaQuery.of(context).size.height *
-                    0.25, // Collapsed height with just the player controls
+                : MediaQuery.of(context).size.height * 0.25,
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
                     color: Colors.black26, blurRadius: 10, spreadRadius: 3),
               ],
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
@@ -44,13 +46,12 @@ class _FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Expand/Collapse control row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
                       icon: Icon(
-                        _isExpanded ? Icons.expand_more : Icons.expand_less,
+                        _isExpanded ? Icons.expand_less : Icons.expand_more,
                       ),
                       onPressed: () {
                         setState(() {
@@ -61,39 +62,44 @@ class _FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
                     IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () {
+                        setState(() {
+                          _isClosing = true; // Mark the widget as closing
+                        });
                         context.read<AudioBloc>().add(StopAudio());
                       },
                     ),
                   ],
                 ),
-                  Column(
+                Expanded(
+                  child: Column(
                     mainAxisAlignment: _isExpanded
                         ? MainAxisAlignment.end
                         : MainAxisAlignment.center,
                     children: [
                       if (_isExpanded)
-                        Center(
+                        const Center(
                           child: Placeholder(
                             fallbackHeight: 150,
                             fallbackWidth: 150,
                           ), // Image placeholder when expanded
                         ),
-                      // Text(
-                      //   audioState.isPlaying
-                      //       ? 'Playing: ${audioState.currentAudioUrl}'
-                      //       : 'Paused: ${audioState.currentAudioUrl}',
-                      // ),
+                      if (audioState.isLoading)
+                        const CircularProgressIndicator(),
                       const SizedBox(height: 10),
                       // Slider and controls (always visible)
                       Slider(
-                        value:
-                            audioState.currentDuration.inSeconds.toDouble(),
+                        value: audioState.currentDuration.inSeconds.toDouble(),
                         min: 0,
                         max: audioState.totalDuration.inSeconds.toDouble(),
-                        onChanged: (value) {
-                          context.read<AudioBloc>().add(
-                              SeekAudio(Duration(seconds: value.toInt())));
-                        },
+                        onChanged: audioState.isLoading
+                            ? null
+                            : (value) {
+                                context.read<AudioBloc>().add(
+                                      SeekAudio(
+                                        Duration(seconds: value.toInt()),
+                                      ),
+                                    );
+                              },
                       ),
                       Text(
                         '${_formatDuration(audioState.currentDuration)} / ${_formatDuration(audioState.totalDuration)}',
@@ -120,6 +126,7 @@ class _FloatingAudioPlayerState extends State<FloatingAudioPlayer> {
                       ),
                     ],
                   ),
+                ),
               ],
             ),
           ),

@@ -14,7 +14,7 @@ class TeachersBloc extends Bloc<TeachersEvent, TeachersState> {
       emit(TeachersLoading());
       try {
         List<Teacher> teachers =
-            await getCourseTeachers(event.courseId, event.query);
+            await getCourseTeachers(event.courseId);
         if (teachers.isEmpty) {
           emit(const TeachersFailure(errorMessage: 'No Teachers found.'));
           return;

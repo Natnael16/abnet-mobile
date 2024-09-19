@@ -24,7 +24,7 @@ class Media {
   });
 
   // From JSON
-  factory Media.fromJson(Map<String, dynamic> json) {
+  factory Media.fromJson(Map<dynamic, dynamic> json) {
     return Media(
       id: json['id'],
       createdAt: json['created_at'],

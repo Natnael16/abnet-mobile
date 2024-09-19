@@ -48,3 +48,12 @@ class UpdatePlayerState extends AudioEvent {
   @override
   List<Object?> get props => [isPlaying];
 }
+
+class UpdateDownloadProgress extends AudioEvent {
+  final double progress;
+
+  const UpdateDownloadProgress(this.progress);
+
+  @override
+  List<Object?> get props => [progress];
+}

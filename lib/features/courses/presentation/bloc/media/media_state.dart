@@ -6,6 +6,7 @@ class AudioState extends Equatable {
   final String? currentAudioUrl;
   final Duration currentDuration;
   final Duration totalDuration;
+  final double downloadProgress;
 
   const AudioState({
     required this.isPlaying,
@@ -13,6 +14,7 @@ class AudioState extends Equatable {
     this.currentAudioUrl,
     required this.currentDuration,
     required this.totalDuration,
+    this.downloadProgress = 0.0,
   });
 
   AudioState copyWith({
@@ -21,6 +23,7 @@ class AudioState extends Equatable {
     String? currentAudioUrl,
     Duration? currentDuration,
     Duration? totalDuration,
+    double? downloadProgress,
   }) {
     return AudioState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -28,6 +31,7 @@ class AudioState extends Equatable {
       currentAudioUrl: currentAudioUrl ?? this.currentAudioUrl,
       currentDuration: currentDuration ?? this.currentDuration,
       totalDuration: totalDuration ?? this.totalDuration,
+      downloadProgress: downloadProgress ?? this.downloadProgress,
     );
   }
 
@@ -38,5 +42,6 @@ class AudioState extends Equatable {
         currentAudioUrl,
         currentDuration,
         totalDuration,
+        downloadProgress,
       ];
 }

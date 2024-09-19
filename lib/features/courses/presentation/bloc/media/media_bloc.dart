@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'media_event.dart';
 part 'media_state.dart';
@@ -20,7 +24,9 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       _audioPlayer?.dispose();
       _audioPlayer = AudioPlayer();
 
-      emit(state.copyWith(isLoading: true));
+      emit(state.copyWith(isLoading: true,
+        currentAudioUrl: event.audioUrl,
+      ));
 
       try {
         // Load the audio
@@ -79,6 +85,39 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     on<UpdatePlayerState>((event, emit) {
       emit(state.copyWith(isPlaying: event.isPlaying));
     });
+    on<UpdateDownloadProgress>((event, emit) {
+      emit(state.copyWith(downloadProgress: event.progress));
+    });
+    
+    Future<String?> downloadAudio(String url) async {
+      try {
+        final dir = await getApplicationDocumentsDirectory();
+        final filePath = '${dir.path}/${url.split('/').last}';
+        final file = File(filePath);
+
+        if (await file.exists()) {
+          return filePath; // Return if the file is already downloaded
+        }
+
+        Dio dio = Dio();
+        await dio.download(
+          url,
+          filePath,
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              final progress = received / total;
+              add(UpdateDownloadProgress(progress)); // Emit progress event
+            }
+          },
+        );
+
+        return filePath;
+      } catch (e) {
+        print('Error downloading file: $e');
+        return null;
+      }
+    }
+
   }
 
   @override

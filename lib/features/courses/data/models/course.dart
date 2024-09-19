@@ -12,7 +12,7 @@ class Course {
   });
 
   // Factory method to create an instance from a map (for JSON parsing)
-  factory Course.fromJson(Map<String, dynamic> json) {
+  factory Course.fromJson(dynamic json) {
     return Course(
       id: json['id'],
       title: json['title'],

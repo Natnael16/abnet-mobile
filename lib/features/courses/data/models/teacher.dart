@@ -14,7 +14,7 @@ class Teacher {
   });
 
   // Factory method to create an instance from a map (for JSON parsing)
-  factory Teacher.fromJson(Map<String, dynamic> json) {
+  factory Teacher.fromJson(dynamic json) {
     return Teacher(
       id: json['id'],
       createdAt: json['created_at'],
@@ -35,4 +35,3 @@ class Teacher {
     };
   }
 }
-

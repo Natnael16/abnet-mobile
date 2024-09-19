@@ -11,6 +11,7 @@ import 'features/courses/presentation/bloc/course/course_bloc.dart';
 import 'features/courses/presentation/bloc/media/media_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
 import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 
 void main() async {
@@ -20,6 +21,8 @@ void main() async {
     anonKey: dotenv.env['ANON_KEY'] ?? '',
   );
   await injectionInit();
+  await Hive.initFlutter();
+  await Hive.openBox('cacheBox');
   Bloc.observer = MyGlobalObserver();
   runApp(ResponsiveSizer(
     builder: (context, orientation, screenType) {

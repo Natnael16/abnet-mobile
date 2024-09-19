@@ -21,15 +21,16 @@ class Topic {
       this.media});
 
   // Factory method to create an instance from a map (for JSON parsing)
-  factory Topic.fromJson(Map<String, dynamic> json) {
+  factory Topic.fromJson(dynamic json) {
     return Topic(
-      id: json['id'],
-      createdAt: json['created_at'],
-      title: json['title'],
-      description: json['description'] ?? '',
-      superTopicId: json['super_topic_id'],
-      teacherCourseId: json['teacher_course_id'],
-    );
+        id: json['id'],
+        createdAt: json['created_at'],
+        title: json['title'],
+        description: json['description'] ?? '',
+        superTopicId: json['super_topic_id'],
+        teacherCourseId: json['teacher_course_id'],
+        isTopicFinal: json['is_topic_final'] ?? false,
+        media: json['media'] != null ? Media.fromJson(json['media']): null);
   }
 
   // Method to convert an instance to a map (for JSON serialization)
@@ -41,6 +42,8 @@ class Topic {
       'description': description,
       'super_topic_id': superTopicId,
       'teacher_course_id': teacherCourseId,
+      'is_topic_final': isTopicFinal,
+      'media': media?.toJson(),
     };
   }
 }
