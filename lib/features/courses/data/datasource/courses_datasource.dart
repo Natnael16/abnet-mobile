@@ -12,8 +12,7 @@ Future<List<Course>> getCourses() async {
 
   // Check for cached data first
   var cachedCourses = cacheBox.get(cacheKey);
-  if ((cachedCourses as List<dynamic>).isNotEmpty) {
-    // Return cached data immediately
+  if (cachedCourses != null && (cachedCourses as List<dynamic>).isNotEmpty) {
     courses = (cachedCourses).map((course) => Course.fromJson(course)).toList();
 
     // Check network connectivity and update cache in the background if needed

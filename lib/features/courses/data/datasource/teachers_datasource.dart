@@ -12,12 +12,10 @@ Future<List<Teacher>> getCourseTeachers(int courseId) async {
 
   // Check for cached data first
   var cachedTeachers = cacheBox.get(cacheKey);
-  if ((cachedTeachers as List<dynamic>).isNotEmpty) {
-    // Return cached data immediately
+  if (cachedTeachers != null && (cachedTeachers as List<dynamic>).isNotEmpty) {
     teachers =
         (cachedTeachers).map((teach) => Teacher.fromJson(teach)).toList();
 
-    // Check network connectivity and update cache in the background if needed
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
       _updateTeachersCacheInBackground(courseId, cacheKey);

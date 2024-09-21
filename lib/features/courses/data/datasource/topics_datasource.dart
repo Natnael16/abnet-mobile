@@ -19,7 +19,7 @@ Future<List<Topic>> getTopics(int courseId, int teacherId, int? topicId) async {
   // Check for cached data first
   var cachedTopics = cacheBox.get(cacheKey);
 
-  if (cachedTopics.isNotEmpty) {
+  if (cachedTopics != null && cachedTopics.isNotEmpty) {
     
     List<dynamic> decodedTopics = jsonDecode(cachedTopics);
     topics = decodedTopics.map((topicMap) => Topic.fromJson(topicMap)).toList();

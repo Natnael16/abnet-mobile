@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,7 +15,7 @@ import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 
-void main() async {
+Future<void> main() async {
   await dotenv.load();
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
@@ -24,6 +25,11 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('cacheBox');
   Bloc.observer = MyGlobalObserver();
+  await JustAudioBackground.init(
+    androidNotificationChannelId: "com.ryanheise.bg_demo.channel.audio",
+    androidNotificationChannelName: "Audio playback",
+    androidNotificationOngoing: true,
+  );
   runApp(ResponsiveSizer(
     builder: (context, orientation, screenType) {
       return MultiBlocProvider(
