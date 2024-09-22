@@ -1,15 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../../core/utils/colors.dart';
+import '../../data/datasource/stream_and_cache_audio.dart';
+import '../../data/models/duration_state.dart';
 import '../../data/models/media.dart';
-import 'package:abnet_mobile/core/utils/images.dart';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+
+import '../widgets/ab_repeat_button.dart';
+import '../widgets/custom_progress_bar.dart';
+import '../widgets/media_document_viewer.dart';
+import '../widgets/speed_dropdown.dart';
 
 class MediaPlayerPage extends StatefulWidget {
   final Media media;
@@ -23,7 +29,7 @@ class MediaPlayerPage extends StatefulWidget {
 class MediaPlayerPageState extends State<MediaPlayerPage> {
   late AudioPlayer _audioPlayer;
   late Stream<DurationState> _durationState;
-  bool _isLooping = false; // Default to not looping
+  bool _isLooping = true;
   bool _isABRepeat = false; // Default to not A-B repeating
   Duration? _aPoint;
   Duration? _bPoint;
@@ -32,6 +38,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    _audioPlayer.setLoopMode(LoopMode.all);
     _init();
 
     _durationState =
@@ -56,19 +63,39 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
   }
 
   Future<void> _init() async {
-    final artUri = await getArtUri(); // Get the file URI for the asset
+    final artUri = await getArtUri();
+    var cacheBox = Hive.box('audioCache');
+    String cacheKey = widget.media.audioUrl ?? '';
+    String? cachedFilePath = cacheBox.get(cacheKey);
 
-    await _audioPlayer.setAudioSource(AudioSource.uri(
-      Uri.parse(widget.media.audioUrl ?? ''),
-      tag: MediaItem(
-        title: widget.media.title,
-        id: widget.media.id.toString(),
-        artUri: widget.media.documentUrl != null &&
-                widget.media.documentUrl!.isNotEmpty
-            ? Uri.parse(widget.media.documentUrl!)
-            : artUri,
-      ),
-    ));
+    if (cachedFilePath != null && await File(cachedFilePath).exists()) {
+      await _audioPlayer.setAudioSource(AudioSource.uri(
+        Uri.file(cachedFilePath),
+        tag: MediaItem(
+          title: widget.media.title,
+          id: widget.media.id.toString(),
+          artUri: widget.media.documentUrl != null &&
+                  widget.media.documentUrl!.isNotEmpty
+              ? Uri.parse(widget.media.documentUrl!)
+              : artUri,
+        ),
+      ));
+    } else {
+      // Play from the network
+      await _audioPlayer.setAudioSource(AudioSource.uri(
+        Uri.parse(widget.media.audioUrl ?? ''),
+        tag: MediaItem(
+          title: widget.media.title,
+          id: widget.media.id.toString(),
+          artUri: widget.media.documentUrl != null &&
+                  widget.media.documentUrl!.isNotEmpty
+              ? Uri.parse(widget.media.documentUrl!)
+              : artUri,
+        ),
+      ));
+      // Save streamed data in the background
+      streamAndCacheAudio(widget.media);
+    }
   }
 
   Future<Uri> getArtUri() async {
@@ -86,18 +113,11 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
     super.dispose();
   }
 
-  String _formatDuration(Duration? duration) {
-    if (duration == null) return '00:00';
-    final minutes = duration.inMinutes.toString().padLeft(2, '0');
-    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.media.title),
+        title: Text(widget.media.title, style: const TextStyle(fontSize: 20)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -108,7 +128,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildMediaImage(),
+            buildMediaImage(context, widget.media),
             Column(
               children: [
                 Padding(
@@ -123,35 +143,25 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
                           const SizedBox(
                             width: 20,
                           ),
-                          _speedControlButton(),
+                          speedControlButton(
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _audioPlayer.setSpeed(value);
+                                  });
+                                }
+                              },
+                              audioPlayer: _audioPlayer),
                         ],
                       ),
                       _aBControls(), // A and B point controls
                     ],
                   ),
                 ),
-                StreamBuilder<DurationState>(
-                  stream: _durationState,
-                  builder: (context, snapshot) {
-                    final durationState = snapshot.data;
-                    final progress = durationState?.progress ?? Duration.zero;
-                    final buffered = durationState?.buffered ?? Duration.zero;
-                    final total = durationState?.total ?? Duration.zero;
-
-                    return ProgressBar(
-                      progress: progress,
-                      buffered: buffered,
-                      total: total,
-                      onSeek: (duration) {
-                        _audioPlayer.seek(duration);
-                      },
-                      progressBarColor: AppColors.primaryColor,
-                      baseBarColor: Colors.grey[300],
-                      bufferedBarColor: AppColors.primaryColor.withOpacity(0.3),
-                      thumbColor: AppColors.primaryColor,
-                      barHeight: 6.0,
-                      thumbRadius: 8.0,
-                    );
+                CustomProgressBar(
+                  durationStateStream: _durationState,
+                  onSeek: (duration) {
+                    _audioPlayer.seek(duration);
                   },
                 ),
 
@@ -168,42 +178,6 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Media Image Display
-  Widget _buildMediaImage() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.62,
-          width: double.infinity,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: widget.media.documentUrl != null
-                ? InteractiveViewer(
-                    child: CachedNetworkImage(
-                      imageUrl: widget.media.documentUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(
-                              color: AppColors.black)),
-                      errorWidget: (context, url, error) => Image.asset(
-                          AppImages.msleFkurWelda,
-                          fit: BoxFit.cover),
-                    ),
-                  )
-                : InteractiveViewer(
-                    child: Image.asset(AppImages.msleFkurWelda,
-                        fit: BoxFit.cover)),
-          ),
         ),
       ),
     );
@@ -275,7 +249,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _abPointButton("ጀምር", _aPoint, () {
+        abPointButton("ጀምር", _aPoint, () {
           setState(() {
             _setA();
           });
@@ -284,7 +258,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
           padding: EdgeInsets.all(8.0),
           child: Text("--"),
         ),
-        _abPointButton("ጨርስ", _bPoint, () {
+        abPointButton("ጨርስ", _bPoint, () {
           setState(() {
             _setB();
           });
@@ -293,95 +267,22 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
     );
   }
 
-  // Individual A/B point buttons
-  Widget _abPointButton(String label, Duration? point, VoidCallback onPressed) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        decoration: BoxDecoration(
-          color: point != null ? AppColors.primaryColor : AppColors.defaultGrey,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          point != null ? _formatDuration(point) : label,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Speed Control Dropdown
-  Widget _speedControlButton() {
-    return Container(
-      decoration: BoxDecoration(
-          color: AppColors.defaultGrey,
-          borderRadius: BorderRadius.circular(16)),
-      child: Tooltip(
-        message: "ፍጥነት",
-        child: Center(
-          child: DropdownButton<double>(
-              value: _audioPlayer.speed,
-              items: const [
-                DropdownMenuItem(value: 0.25, child: Text("0.25x")),
-                DropdownMenuItem(value: 0.5, child: Text("0.5x")),
-                DropdownMenuItem(value: 1.0, child: Text("1x")),
-                DropdownMenuItem(value: 1.5, child: Text("1.5x")),
-                DropdownMenuItem(value: 2.0, child: Text("2x")),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _audioPlayer.setSpeed(value);
-                  });
-                }
-              },
-              icon: null,
-              iconSize: 0,
-              alignment: AlignmentDirectional.center,
-              dropdownColor: AppColors.defaultGrey,
-              isDense: true,
-              padding: const EdgeInsets.all(4),
-              style: const TextStyle(fontSize: 16, color: AppColors.black),
-              underline: const SizedBox.shrink(),
-              borderRadius: BorderRadius.circular(16)),
-        ),
-      ),
-    );
-  }
-
   // Set Point A for A-B repeat
   void _setA() {
     _aPoint = _audioPlayer.position;
     if (_bPoint != null && _aPoint!.compareTo(_bPoint!) >= 0) {
-      _aPoint = null; // Reset A if it is greater than B
+      _aPoint = null;
     } else {
       _isABRepeat = true;
     }
   }
 
-  // Set Point B for A-B repeat
   void _setB() {
     _bPoint = _audioPlayer.position;
     if (_aPoint != null && _bPoint!.compareTo(_aPoint!) <= 0) {
-      _bPoint = null; // Reset B if it is less than A
+      _bPoint = null;
     } else {
       _isABRepeat = true;
     }
   }
-}
-
-class DurationState {
-  final Duration progress;
-  final Duration buffered;
-  final Duration total;
-
-  DurationState({
-    required this.progress,
-    required this.buffered,
-    required this.total,
-  });
 }

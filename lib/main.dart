@@ -24,6 +24,7 @@ Future<void> main() async {
   await injectionInit();
   await Hive.initFlutter();
   await Hive.openBox('cacheBox');
+  await Hive.openBox('audioCache');
   Bloc.observer = MyGlobalObserver();
   await JustAudioBackground.init(
     androidNotificationChannelId: "com.ryanheise.bg_demo.channel.audio",
