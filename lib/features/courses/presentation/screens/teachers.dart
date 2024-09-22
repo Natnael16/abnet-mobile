@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routes/paths.dart';
 import '../../../../core/shared_widgets/custom_textfield.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
+import '../../../../core/utils/colors.dart';
 import '../../../../core/utils/images.dart';
 import '../../data/models/teacher.dart';
 import '../bloc/teachers/teachers_bloc.dart';
-import '../widgets/floating_player.dart';
 import '../widgets/intro_text.dart';
 import '../widgets/navigational_button.dart';
 import '../widgets/shimmer_list.dart';
@@ -16,88 +16,120 @@ import '../widgets/shimmer_list.dart';
 class TeachersPage extends StatefulWidget {
   final int courseId;
   final String courseTitle;
-  const TeachersPage(
-      {super.key, required this.courseId, required this.courseTitle});
+  const TeachersPage({
+    super.key,
+    required this.courseId,
+    required this.courseTitle,
+  });
 
   @override
   State<TeachersPage> createState() => _TeachersPageState();
 }
 
 class _TeachersPageState extends State<TeachersPage> {
+  TextEditingController searchController = TextEditingController();
+  List<Teacher> allTeachers = [];
+  List<Teacher> filteredTeachers = [];
+
   @override
-  initState() {
+  void initState() {
+    super.initState();
     BlocProvider.of<TeachersBloc>(context)
         .add(GetTeachersEvent(courseId: widget.courseId));
-    super.initState();
+    searchController.addListener(() {
+      filterTeachers();
+    });
   }
 
-  TextEditingController searchController = TextEditingController();
+  void filterTeachers() {
+    final query = searchController.text.toLowerCase();
+    setState(() {
+      filteredTeachers = allTeachers
+          .where((teacher) => teacher.name.toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("ረቡኒ",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
-          centerTitle: true,
-        ),
-        drawer: const Drawer(),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              IntroText(title: widget.courseTitle),
-              const SizedBox(height: 16),
-              SearchTextField(
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(right: 6.0),
-                    child: SvgPicture.asset(AppImages.searchIcon,
-                        width: 22, height: 22),
-                  ),
-                  controller: searchController),
-              const SizedBox(height: 16),
-              BlocConsumer<TeachersBloc, TeachersState>(
-                listener: (context, state) {},
-                builder: (context, state) {
-                  if (state is TeachersLoading) {
-                    return const ShimmerList();
-                  } else if (state is TeachersSuccess) {
-                    final List<Teacher> teachers =
-                        state.teachers; // Assuming state has a list of courses
-
-                    return ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: teachers.length,
-                      itemBuilder: (context, index) {
-                        final teacher = teachers[index];
-
-                        return NavigationalButton(
-                          title: teacher.name, // Use course title
+      appBar: AppBar(
+        title: const Text("ረቡኒ",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
+        centerTitle: true,
+      ),
+      drawer: const Drawer(),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 16),
+            IntroText(title: widget.courseTitle),
+            const SizedBox(height: 16),
+            SearchTextField(
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: SvgPicture.asset(AppImages.searchIcon,
+                    width: 22, height: 22),
+              ),
+              controller: searchController,
+            ),
+            const SizedBox(height: 16),
+            BlocConsumer<TeachersBloc, TeachersState>(
+              listener: (context, state) {
+                if (state is TeachersSuccess) {
+                  setState(() {
+                    allTeachers = state.teachers;
+                    filteredTeachers = allTeachers;
+                  });
+                }
+              },
+              builder: (context, state) {
+                if (state is TeachersLoading) {
+                  return const ShimmerList();
+                } else if (state is TeachersSuccess) {
+                  return ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: filteredTeachers.isNotEmpty
+                        ? filteredTeachers.length
+                        : 1,
+                    itemBuilder: (context, index) {
+                      if (filteredTeachers.isEmpty) {
+                        return NoDataReload(
                           onPressed: () {
-                            context.push(AppPaths.topics, extra: {
-                              'courseId': widget.courseId,
-                              "title": teacher.name,
-                              "teacherId": teacher.id,
-                            });
-
-                            // Add your navigation logic here
+                            BlocProvider.of<TeachersBloc>(context).add(
+                                GetTeachersEvent(courseId: widget.courseId));
                           },
                         );
-                      },
-                    );
-                  }
-                  return NoDataReload(
-                    onPressed: () {
-                      BlocProvider.of<TeachersBloc>(context)
-                          .add(GetTeachersEvent(courseId: widget.courseId));
+                      }
+                      final teacher = filteredTeachers[index];
+                      return NavigationalButton(
+                        title: teacher.name, // Use the original title
+                        onPressed: () {
+                          context.push(AppPaths.topics, extra: {
+                            'courseId': widget.courseId,
+                            "title": teacher.name,
+                            "teacherId": teacher.id,
+                          });
+                        },
+                        searchQuery: searchController
+                            .text, // Pass the search query for highlighting
+                      );
                     },
                   );
-                },
-              )
-            ],
-          ),
+                }
+                return NoDataReload(
+                  onPressed: () {
+                    BlocProvider.of<TeachersBloc>(context)
+                        .add(GetTeachersEvent(courseId: widget.courseId));
+                  },
+                );
+              },
+            )
+          ],
         ),
-        );
+      ),
+    );
   }
 }

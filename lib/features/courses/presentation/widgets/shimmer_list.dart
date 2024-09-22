@@ -16,7 +16,7 @@ class ShimmerList extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
           decoration: BoxDecoration(
             color: AppColors.defaultGrey, // Background color
-            borderRadius: BorderRadius.circular(8), // Rounded corners
+            borderRadius: BorderRadius.circular(16), // Rounded corners
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.2), // Shadow color

@@ -5,9 +5,8 @@ import '../../../../core/routes/paths.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../data/models/course.dart';
 import '../bloc/course/course_bloc.dart';
-import '../widgets/floating_player.dart';
+import '../widgets/course_card.dart'; // Import the CourseCard widget
 import '../widgets/intro_text.dart';
-import '../widgets/navigational_button.dart';
 import '../widgets/shimmer_list.dart';
 
 class CoursesPage extends StatefulWidget {
@@ -21,7 +20,6 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   initState() {
     BlocProvider.of<CourseBloc>(context).add(GetCoursesEvent());
-
     super.initState();
   }
 
@@ -47,24 +45,32 @@ class _CoursesPageState extends State<CoursesPage> {
                 if (state is CourseLoading) {
                   return const ShimmerList();
                 } else if (state is CourseSuccess) {
-                  final List<Course> courses =
-                      state.courses; // Assuming state has a list of courses
+                  final List<Course> courses = state.courses;
 
-                  return ListView.builder(
+                  return GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
                     shrinkWrap: true,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Adjust the number of columns
+                      childAspectRatio: 1, // Adjust aspect ratio for card
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
                     itemCount: courses.length,
                     itemBuilder: (context, index) {
                       final course = courses[index];
 
-                      return NavigationalButton(
+                      return CourseCard(
                         title: course.title, // Use course title
+                        iconPath:
+                            'assets/icons/${course.title}.svg', // Local icon path
                         onPressed: () {
                           context.push(AppPaths.teachers, extra: {
                             'courseId': course.id,
                             "courseTitle": course.title
                           });
-                          // Add your navigation logic here
                         },
                       );
                     },
@@ -76,7 +82,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   },
                 );
               },
-            )
+            ),
           ],
         ),
       ),
