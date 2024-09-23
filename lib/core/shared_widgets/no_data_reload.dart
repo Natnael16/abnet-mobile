@@ -26,8 +26,7 @@ class NoDataReload extends StatelessWidget {
         SizedBox(height: 3.h),
         Text('ምንም ማግኘት አልተቻለም ', style: Theme.of(context).textTheme.bodyMedium),
         SizedBox(height: 3.h),
-        CustomRoundButton(
-            borderRadius: 4, buttonText: "እንደገና ይሞክሩ", onPressed: onPressed)
+        CustomRoundButton(buttonText: "እንደገና ይሞክሩ", onPressed: onPressed)
       ],
     );
   }

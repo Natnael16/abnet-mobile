@@ -173,7 +173,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
                     _seekButton(5),
                   ],
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
               ],
             ),
           ],
@@ -189,12 +189,16 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
       builder: (context, snapshot) {
         final playerState = snapshot.data;
         final isPlaying = playerState?.playing ?? false;
-        return IconButton(
-          icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              size: 40),
-          color: AppColors.black,
-          onPressed: () =>
-              isPlaying ? _audioPlayer.pause() : _audioPlayer.play(),
+        return CircleAvatar(
+          maxRadius: 24,
+          backgroundColor: AppColors.black,
+          child: GestureDetector(
+            onTap: () => isPlaying ? _audioPlayer.pause() : _audioPlayer.play(),
+            child: Icon(
+                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                color: AppColors.white,
+                size: 40),
+          ),
         );
       },
     );
@@ -284,5 +288,4 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
       _isABRepeat = true;
     }
   }
-  
 }

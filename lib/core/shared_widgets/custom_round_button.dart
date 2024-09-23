@@ -6,7 +6,7 @@ import '../utils/colors.dart';
 class CustomRoundButton extends StatelessWidget {
   const CustomRoundButton(
       {required this.buttonText,
-       this.borderRadius = 10,
+       this.borderRadius = 40,
       super.key,
       this.onPressed});
   final double borderRadius;

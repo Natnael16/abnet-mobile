@@ -4,16 +4,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'core/injections/injection_container.dart';
 import 'core/routes/router_config.dart';
 import 'core/utils/bloc_observer.dart';
+import 'core/utils/theme.dart';
 import 'features/courses/presentation/bloc/course/course_bloc.dart';
 import 'features/courses/presentation/bloc/media/media_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
 import 'features/courses/presentation/bloc/topics/topics_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 
 Future<void> main() async {
   await dotenv.load();
@@ -33,15 +33,21 @@ Future<void> main() async {
   );
   runApp(ResponsiveSizer(
     builder: (context, orientation, screenType) {
-      return MultiBlocProvider(
-        providers: [
-           BlocProvider<CourseBloc>(create: (_) => CourseBloc()),
-           BlocProvider<TeachersBloc>(create: (_) => TeachersBloc()),
-           BlocProvider<TopicsBloc>(create: (_) => TopicsBloc()),
-           BlocProvider<AudioBloc>(create: (_) => AudioBloc())
-        ],
-        child: MyApp(),
-      );
+      return Builder(builder: (context) {
+        return AdaptiveTheme(
+          light: appTheme, // Your custom light theme
+            dark: darkTheme, // Define your custom dark theme
+            initial: AdaptiveThemeMode.light,
+            builder: (theme, darkTheme) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider<CourseBloc>(create: (_) => CourseBloc()),
+                    BlocProvider<TeachersBloc>(create: (_) => TeachersBloc()),
+                    BlocProvider<TopicsBloc>(create: (_) => TopicsBloc()),
+                    BlocProvider<AudioBloc>(create: (_) => AudioBloc())
+                  ],
+                  child: MyApp(),
+                ));
+      });
     },
   ));
 }
@@ -49,7 +55,6 @@ Future<void> main() async {
 
 final supabase = Supabase.instance.client;
 // final FloatingAudioPlayer audioPlayer = FloatingAudioPlayer();
-
 
 final isLoggedIn =
     supabase.auth.currentSession != null; // Retrieve the current session data

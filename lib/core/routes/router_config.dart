@@ -1,5 +1,6 @@
 import 'package:abnet_mobile/core/routes/paths.dart';
 import 'package:abnet_mobile/features/courses/presentation/screens/courses.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/courses/presentation/screens/media_player.dart';
@@ -58,6 +59,6 @@ class AppRouter extends StatelessWidget {
         routeInformationProvider: _router.routeInformationProvider,
         routeInformationParser: _router.routeInformationParser,
         routerDelegate: _router.routerDelegate,
-        theme: appTheme,
+        theme: AdaptiveTheme.of(context).theme,
       );
 }

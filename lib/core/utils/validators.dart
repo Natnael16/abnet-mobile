@@ -3,7 +3,7 @@ String? validateFullName(String? value) {
     return 'Please enter your full name';
   }
 
-  return null; // Return null if the input is valid
+  return null;
 }
 
 String? validateTitle(String? value) {
@@ -11,7 +11,7 @@ String? validateTitle(String? value) {
     return 'Title must be at least 5 characters';
   }
 
-  return null; // Return null if the input is valid
+  return null;
 }
 
 String? validateDescription(String? value) {
@@ -19,5 +19,5 @@ String? validateDescription(String? value) {
     return 'Description must be at least 10 characters';
   }
 
-  return null; // Return null if the input is valid
+  return null;
 }

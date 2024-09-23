@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/routes/paths.dart';
+import '../../../../core/shared_widgets/custom_drawer.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../data/models/course.dart';
 import '../bloc/course/course_bloc.dart';
@@ -31,7 +32,7 @@ class _CoursesPageState extends State<CoursesPage> {
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
         centerTitle: true,
       ),
-      drawer: const Drawer(),
+      drawer: const CustomDrawer(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
