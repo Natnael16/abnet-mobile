@@ -38,6 +38,7 @@ dependencies:
   dartz: ^0.10.1
   dio: ^5.7.0
   equatable: ^2.0.5
+  file_picker: ^8.1.2
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6

@@ -1,8 +1,10 @@
 import 'package:abnet_mobile/core/routes/paths.dart';
+import 'package:abnet_mobile/features/auth/presentation/screens/login.dart';
 import 'package:abnet_mobile/features/courses/presentation/screens/courses.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/admin/presentation/screens/admin.dart';
 import '../../features/courses/presentation/screens/media_player.dart';
 import '../../features/courses/presentation/screens/teachers.dart';
 import '../../features/courses/presentation/screens/topics.dart';
@@ -46,6 +48,14 @@ class AppRouter extends StatelessWidget {
             var extra = state.extra as Map<String, dynamic>;
             return MediaPlayerPage(media: extra['media']);
           }),
+      GoRoute(
+        path: AppPaths.admin,
+        builder: (BuildContext context, GoRouterState state) => AdminPage(),
+      ),
+      GoRoute(
+        path: AppPaths.login,
+        builder: (BuildContext context, GoRouterState state) => LoginPage(),
+      ),
     ],
   );
 
