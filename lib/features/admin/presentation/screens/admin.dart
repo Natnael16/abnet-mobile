@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../../core/shared_widgets/custom_drawer.dart';
+import '../../../../core/shared_widgets/custom_round_button.dart';
+import '../../../../core/utils/colors.dart';
+import '../../../courses/data/datasource/courses_datasource.dart';
+import '../../../courses/data/datasource/teachers_datasource.dart';
+import '../../../courses/data/datasource/topics_datasource.dart';
+import '../../../courses/data/models/course.dart';
+import '../../../courses/data/models/teacher.dart';
+import '../../../courses/data/models/topic.dart';
+import '../widgets/dropdown_field.dart';
+import '../widgets/upload_section.dart';
 
 class AdminPage extends StatefulWidget {
   @override
@@ -11,60 +22,160 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   // Dropdown selections
-  String selectedCourseType = "Nibab bet";
-  String selectedTeacher = "Memhr nekea tibeb";
-  String selectedSection = "Wudase Mariam";
-  String selectedSubSection = "Zesenuy";
+  String selectedCourseType = "";
+  String selectedTeacher = "";
+  String selectedSection = "";
+  String selectedSubSection = "";
 
-  List<String> courseTypes = ["Nibab bet", "Yetmhret aynet", "Type 3"];
-  List<String> teachers = ["Memhr nekea tibeb", "Memhr 2", "Memhr 3"];
-  List<String> sections = ["Wudase Mariam", "Section 2", "Section 3"];
-  List<String> subSections = ["Zesenuy", "Sub Section 2", "Sub Section 3"];
-
+  // Updated lists to use Course, Teacher, and Topic classes
+  List<Course> courseTypes = [];
+  List<Teacher> teachers = [];
+  List<Topic> sections = [];
+  List<Topic> subSections = [];
+  List<String> docTypes = ['pdf', 'doc', 'docx', 'jpeg', 'jpg', 'png'];
+  List<String> mediaTypes = ['mp4', 'mp3'];
   String? _documentFileName;
   String? _mediaFileName;
 
-  // Function to add a new item to dropdown if not found
+  // Fetch data for dropdowns
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialData();
+  }
+
+  Future<void> _fetchInitialData() async {
+    try {
+      courseTypes = await getCourses();
+      teachers = await getTeachers();
+      sections = await getAllTopics();
+      // Set default selected values if lists are not empty
+      setState(() {
+        selectedCourseType =
+            courseTypes.isNotEmpty ? courseTypes.first.title : '';
+        selectedTeacher = teachers.isNotEmpty ? teachers.first.name : '';
+        selectedSection = sections.isNotEmpty ? sections.first.title : '';
+      });
+    } catch (e) {
+      debugPrint("Error initializing dropdowns: $e");
+    }
+    setState(() {}); // Refresh the UI with the fetched data
+  }
+
+  // Function to add a course
+  Future<void> addCourse(String courseTitle) async {
+    try {
+      Course? newCourse = await createCourse(courseTitle);
+
+      if (newCourse != null) {
+        setState(() {
+          courseTypes.add(newCourse);
+          selectedCourseType = newCourse.title;
+        });
+        Fluttertoast.showToast(
+          msg: "አዲስ ትምህርት በተሳካ ሁኔታ ተመዝግቧል",
+          backgroundColor: AppColors.primaryColor,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "አልተሳካም እንደገና ይሞክሩ",
+          backgroundColor: Colors.red.shade400,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "አልተሳካም እንደገና ይሞክሩ",
+        backgroundColor: Colors.red.shade400,
+      );
+    }
+  }
+
+  // Function to add a teacher
+  Future<void> addTeacher(String teacherName) async {
+    try {
+      Teacher? newTeacher = await createTeacher(teacherName);
+      if (newTeacher != null) {
+        setState(() {
+          teachers.add(newTeacher);
+          selectedTeacher = newTeacher.name;
+        });
+        Fluttertoast.showToast(
+          msg: "አዲስ መምህር በተሳካ ሁኔታ ተመዝግቧል",
+          backgroundColor: AppColors.primaryColor,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "አልተሳካም እንደገና ይሞክሩ",
+          backgroundColor: AppColors.primaryColor,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "አልተሳካም እንደገና ይሞክሩ",
+        backgroundColor: Colors.red.shade400,
+      );
+    }
+  }
+
+  // Function to add a topic
+  Future<void> addTopic(String topicTitle) async {
+    try {
+      Topic? newTopic = await createTopic(topicTitle);
+      if (newTopic != null) {
+        setState(() {
+          sections.add(newTopic);
+          selectedSection = newTopic.title;
+        });
+        Fluttertoast.showToast(
+          msg: "አዲስ ክፍል በተሳካ ሁኔታ ተመዝግቧል",
+          backgroundColor: AppColors.primaryColor,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "አልተሳካም እንደገና ይሞክሩ",
+          backgroundColor: Colors.red.shade400,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "አልተሳካም እንደገና ይሞክሩ",
+        backgroundColor: Colors.red.shade400,
+      );
+    }
+  }
+
   Future<void> _addNewItemDialog(String itemType) async {
     String newItem = '';
     await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add new $itemType'),
+          title: Text('አዲስ $itemType ይጨምሩ'),
           content: TextField(
             onChanged: (value) {
               newItem = value;
             },
-            decoration: InputDecoration(hintText: 'Enter new $itemType'),
+            decoration: InputDecoration(hintText: 'አዲስ $itemType ይጨምሩ'),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('ተመለስ'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  if (itemType == "course type") {
-                    courseTypes.add(newItem);
-                    selectedCourseType = newItem;
-                  } else if (itemType == "teacher") {
-                    teachers.add(newItem);
-                    selectedTeacher = newItem;
-                  } else if (itemType == "section") {
-                    sections.add(newItem);
-                    selectedSection = newItem;
-                  } else if (itemType == "subsection") {
-                    subSections.add(newItem);
-                    selectedSubSection = newItem;
-                  }
-                });
+              onPressed: () async {
                 Navigator.of(context).pop();
+                if (itemType == "የትምህርት አይነት") {
+                  await addCourse(newItem);
+                } else if (itemType == "መምህር") {
+                  await addTeacher(newItem);
+                } else if (itemType == "ክፍል") {
+                  await addTopic(newItem);
+                }
               },
-              child: Text('Add'),
+              child: Text('መዝግብ'),
             ),
           ],
         );
@@ -73,10 +184,10 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   // File pickers
-  Future<void> _pickDocumentFile() async {
+  Future<void> _pickDocumentFile(List<String> types) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'],
+      allowedExtensions: types,
     );
 
     if (result != null) {
@@ -86,10 +197,10 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
-  Future<void> _pickMediaFile() async {
+  Future<void> _pickMediaFile(List<String> types) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'mp4', 'mp3'],
+      allowedExtensions: types,
     );
 
     if (result != null) {
@@ -103,71 +214,69 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ረቡኒ",
+        title: const Text("ዜማ ያሬድ",
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
         centerTitle: true,
       ),
       drawer: const CustomDrawer(),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Admin to header
               Text(
                 'አስፈላጊውን መረጃ ያስገቡ',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
-              
-
+              SizedBox(height: 3.h,),
               // Dropdown for course type
-              _dropdownField(
-                'Course Type',
+              dropdownField(
+                'የትምህርት አይነት',
                 selectedCourseType,
-                courseTypes,
+                courseTypes.map((course) => course.title).toList(),
                 (newValue) {
                   setState(() {
                     selectedCourseType = newValue!;
                   });
                 },
-                () => _addNewItemDialog("course type"),
+                () => _addNewItemDialog("የትምህርት አይነት"),
               ),
               SizedBox(height: 3.h),
 
               // Dropdown for teachers
-              _dropdownField(
-                'Teacher',
+              dropdownField(
+                'መምህር',
                 selectedTeacher,
-                teachers,
+                teachers.map((teacher) => teacher.name).toList(),
                 (newValue) {
                   setState(() {
                     selectedTeacher = newValue!;
                   });
                 },
-                () => _addNewItemDialog("teacher"),
+                () => _addNewItemDialog("መምህር"),
               ),
               SizedBox(height: 3.h),
 
               // Dropdown for sections
-              _dropdownField(
-                'Section',
+              dropdownField(
+                'ክፍል',
                 selectedSection,
-                sections,
+                sections.map((section) => section.title).toList(),
                 (newValue) {
                   setState(() {
                     selectedSection = newValue!;
                   });
                 },
-                () => _addNewItemDialog("section"),
+                () => _addNewItemDialog("ክፍል"),
               ),
               SizedBox(height: 3.h),
 
               // Dropdown for subsections
-              _dropdownField(
+              dropdownField(
                 'Sub Section',
                 selectedSubSection,
-                subSections,
+                subSections.map((subSection) => subSection.title).toList(),
                 (newValue) {
                   setState(() {
                     selectedSubSection = newValue!;
@@ -176,6 +285,7 @@ class _AdminPageState extends State<AdminPage> {
                 () => _addNewItemDialog("subsection"),
               ),
               SizedBox(height: 3.h),
+
               Text(
                 'የመረጡት ቅደም ተከተል ይህን ይመስላል',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
@@ -186,117 +296,32 @@ class _AdminPageState extends State<AdminPage> {
                 style: TextStyle(fontSize: 16.sp),
               ),
               SizedBox(height: 3.h),
-              // Upload document file
-              _uploadSection('Upload documents file', _pickDocumentFile,
-                  _documentFileName),
+
+              uploadSection(
+                  'የንባቡን/የዜማውን ዘር/ምልክት ያስገቡ',
+                  () => _pickDocumentFile(docTypes),
+                  _documentFileName,
+                  docTypes),
               SizedBox(height: 3.h),
 
-              // Upload audio or video file
-              _uploadSection(
-                  'Upload Audio or Video file', _pickMediaFile, _mediaFileName),
+              uploadSection('የዜማውን/የንባቡ/የተንቀሳቃሽ ምስሉን ያስገቡ',
+                  () => _pickMediaFile(mediaTypes), _mediaFileName, mediaTypes),
               SizedBox(height: 5.h),
 
-              // Back and Next buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _button('Back', Colors.grey, () {
-                    Navigator.pop(context);
-                  }),
-                  _button('Next', Colors.green, () {}),
+                  CustomRoundButton(
+                      buttonText: "መዝግብ",
+                      onPressed: () async {
+                        // Add your submission logic here
+                      })
                 ],
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  // Reusable dropdown widget
-  Widget _dropdownField(String label, String selectedItem, List<String> items,
-      ValueChanged<String?> onChanged, VoidCallback onAddNew) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
-        ),
-        SizedBox(height: 1.h),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButton<String>(
-                value: selectedItem,
-                isExpanded: true,
-                onChanged: onChanged,
-                items: items.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.add_circle_outline, size: 24.sp),
-              onPressed: onAddNew,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // Reusable upload section
-  Widget _uploadSection(
-      String title, VoidCallback onPickFile, String? fileName) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
-        ),
-        SizedBox(height: 1.h),
-        GestureDetector(
-          onTap: onPickFile,
-          child: Container(
-            height: 25.h,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_circle_outline, size: 8.h, color: Colors.grey),
-                  SizedBox(height: 2.h),
-                  Text(
-                    fileName ??
-                        'Drag and drop a pdf, doc, docx, or image file (jpg, jpeg)',
-                    style: TextStyle(color: Colors.grey, fontSize: 16.sp),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Reusable button widget
-  Widget _button(String text, Color color, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(40.w, 6.h),
-      ),
-      child: Text(text, style: TextStyle(fontSize: 16.sp)),
     );
   }
 }

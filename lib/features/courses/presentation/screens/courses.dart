@@ -28,7 +28,7 @@ class _CoursesPageState extends State<CoursesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ረቡኒ",
+        title: const Text("ዜማ ያሬድ",
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
         centerTitle: true,
       ),

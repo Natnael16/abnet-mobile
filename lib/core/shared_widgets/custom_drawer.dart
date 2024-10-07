@@ -36,7 +36,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 const Text(
-                  'ረቡኒ',
+                  'ዜማ ያሬድ',
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -99,8 +99,7 @@ class CustomDrawer extends StatelessWidget {
                     height: 24,
                     width: 24,
                   ),
-                  onPressed: () =>
-                      _launchURL('malito:natnaeldenbi@gmail.com'),
+                  onPressed: () => _launchURL('malito:natnaeldenbi@gmail.com'),
                 ),
                 IconButton(
                   icon: SvgPicture.asset(
@@ -108,8 +107,8 @@ class CustomDrawer extends StatelessWidget {
                     height: 24,
                     width: 24,
                   ),
-                  onPressed: () =>
-                      _launchURL('https://linkedin.com/in/natnael-tadele-b3534b230/'),
+                  onPressed: () => _launchURL(
+                      'https://linkedin.com/in/natnael-tadele-b3534b230/'),
                 ),
                 IconButton(
                   icon: SvgPicture.asset(

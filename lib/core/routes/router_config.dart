@@ -9,7 +9,7 @@ import '../../features/courses/presentation/screens/media_player.dart';
 import '../../features/courses/presentation/screens/teachers.dart';
 import '../../features/courses/presentation/screens/topics.dart';
 import '../../features/splash/splash_screen.dart';
-import '../utils/theme.dart';
+import '../../main.dart';
 
 class AppRouter extends StatelessWidget {
   static final GoRouter _router = GoRouter(
@@ -50,7 +50,14 @@ class AppRouter extends StatelessWidget {
           }),
       GoRoute(
         path: AppPaths.admin,
-        builder: (BuildContext context, GoRouterState state) => AdminPage(),
+        builder: (BuildContext context, GoRouterState state) {
+          final session = supabase.auth.currentSession;
+          if (session != null) {
+            return AdminPage();
+          } else {
+            return LoginPage();
+          }
+        },
       ),
       GoRoute(
         path: AppPaths.login,

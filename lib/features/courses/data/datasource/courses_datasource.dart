@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../../../main.dart';
 import '../models/course.dart';
@@ -54,3 +55,22 @@ void _updateCoursesCacheInBackground(String cacheKey) async {
     cacheBox.put(cacheKey, response);
   }
 }
+Future<Course?> createCourse(String title) async {
+  try {
+    final response = await supabase
+        .from('course')
+        .insert({
+          'title': title,
+        })
+        .select()
+        .single();
+
+    if (response.isNotEmpty) {
+      return Course.fromJson(response);
+    }
+  } catch (e) {
+    debugPrint("Error creating course: $e");
+  }
+  return null;
+}
+

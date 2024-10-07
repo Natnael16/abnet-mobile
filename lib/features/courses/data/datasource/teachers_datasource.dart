@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../../../main.dart';
 import '../models/teacher.dart';
@@ -75,4 +76,39 @@ void _updateTeachersCacheInBackground(int courseId, String cacheKey) async {
         .toList();
     cacheBox.put(cacheKey, teachers);
   }
+}
+
+Future<List<Teacher>> getTeachers() async {
+  try {
+    final response = await supabase.from('teacher').select("*");
+    print(response);
+    if (response.isNotEmpty) {
+      List<Teacher> teachers =
+          response.map((teach) => Teacher.fromJson(teach)).toList();
+      return teachers;
+    }
+    return [];
+  } catch (e) {
+    debugPrint("Error fetching teachers: $e");
+    return [];
+  }
+}
+
+Future<Teacher?> createTeacher(String name) async {
+  try {
+    final response = await supabase
+        .from('teacher')
+        .insert({
+          'name': name,
+        })
+        .select()
+        .single();
+
+    if (response.isNotEmpty) {
+      return Teacher.fromJson(response);
+    }
+  } catch (e) {
+    debugPrint("Error creating teacher: $e");
+  }
+  return null; // Return null if creation fails
 }

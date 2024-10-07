@@ -12,8 +12,9 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<GetCoursesEvent>(
         (GetCoursesEvent event, Emitter<CourseState> emit) async {
       emit(CourseLoading());
-      List<Course> courses = await getCourses();
       try {
+        List<Course> courses = await getCourses();
+
         if (courses.isEmpty) {
           emit(const CourseFailure(errorMessage: 'No courses found.'));
           return;

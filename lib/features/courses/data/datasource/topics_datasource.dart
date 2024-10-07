@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../../../main.dart';
 import '../models/topic.dart';
@@ -113,4 +114,39 @@ Future<Media?> doesTopicHasMedia(int topicId) async {
   }
   Media media = Media.fromJson(response.first);
   return media;
+}
+
+Future<List<Topic>> getAllTopics() async {
+  try {
+    final response = await supabase.from('topic').select("*");
+
+    if (response.isNotEmpty) {
+      List<Topic> topics =
+          response.map((topic) => Topic.fromJson(topic)).toList();
+      return topics;
+    }
+    return [];
+  } catch (e) {
+    debugPrint("Error fetching topics: $e");
+    return [];
+  }
+}
+
+Future<Topic?> createTopic(String title) async {
+  try {
+    final response = await supabase
+        .from('topic')
+        .insert({
+          'title': title,
+        })
+        .select()
+        .single();
+
+    if (response.isNotEmpty) {
+      return Topic.fromJson(response);
+    }
+  } catch (e) {
+    debugPrint("Error creating topic: $e");
+  }
+  return null; 
 }

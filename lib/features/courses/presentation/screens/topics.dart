@@ -75,7 +75,7 @@ class _TopicsPageState extends State<TopicsPage> {
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: const Text("ረቡኒ",
+          title: const Text("ዜማ ያሬድ",
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
           centerTitle: true,
         ),
