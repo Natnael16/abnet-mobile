@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-Widget dropdownField(String label, String selectedItem, List<String> items,
-    ValueChanged<String?> onChanged, VoidCallback onAddNew) {
+import '../../../courses/data/models/course.dart';
+import '../../../courses/data/models/topic.dart';
+
+Widget dropdownField(String label, dynamic selectedItem, List<dynamic> items,
+    ValueChanged<dynamic> onChanged, VoidCallback onAddNew) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -14,14 +17,17 @@ Widget dropdownField(String label, String selectedItem, List<String> items,
       Row(
         children: [
           Expanded(
-            child: DropdownButton<String>(
-              value: selectedItem,
+            child: DropdownButton<dynamic>(
+              value:  selectedItem,
               isExpanded: true,
               onChanged: onChanged,
-              items: items.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
+              items: items.map<DropdownMenuItem<dynamic>>((dynamic value) {
+                return DropdownMenuItem<dynamic>(
                   value: value,
-                  child: Text(value),
+                  child: (value is Topic || value is Course)
+                      ? Text(
+                          value.title ?? '')
+                      : Text(value?.name ?? ''),
                 );
               }).toList(),
             ),

@@ -1,4 +1,6 @@
-class Teacher {
+import 'package:equatable/equatable.dart';
+
+class Teacher extends Equatable{
   final int id;
   final String createdAt;
   final String lifeStory;
@@ -24,6 +26,11 @@ class Teacher {
     );
   }
 
+  @override
+  String toString() {
+    return 'Teacher(name: $name, id: $id)';
+  }
+
   // Method to convert an instance to a map (for JSON serialization)
   Map<String, dynamic> toJson() {
     return {
@@ -34,4 +41,7 @@ class Teacher {
       'name': name,
     };
   }
+  
+  @override
+  List<Object?> get props => [id,name,createdAt,lifeStory];
 }

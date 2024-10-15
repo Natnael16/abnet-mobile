@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
+
 import 'media.dart';
 
-class Topic {
+class Topic extends Equatable {
   final int id;
   final String createdAt;
   final String title;
@@ -33,6 +35,10 @@ class Topic {
         media: json['media'] != null ? Media.fromJson(json['media']): null);
   }
 
+  @override
+  String toString() {
+    return 'Topic(title: $title, id: $id, media: $media, superTopicId: $superTopicId)';
+  }
   // Method to convert an instance to a map (for JSON serialization)
   Map<String, dynamic> toJson() {
     return {
@@ -46,4 +52,7 @@ class Topic {
       'media': media?.toJson(),
     };
   }
+  
+  @override
+  List<Object?> get props => [id,title,description,superTopicId,teacherCourseId,isTopicFinal];
 }

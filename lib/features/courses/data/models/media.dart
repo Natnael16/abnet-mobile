@@ -23,6 +23,11 @@ class Media {
     this.audioUrl,
   });
 
+  @override
+  String toString() {
+    return 'Media(title: $title, teacherId: $teacherId topicId: $topicId, documentUrl: $documentUrl, videoUrl: $videoUrl, audioUrl: $audioUrl)';
+  }
+
   // From JSON
   factory Media.fromJson(Map<dynamic, dynamic> json) {
     return Media(
