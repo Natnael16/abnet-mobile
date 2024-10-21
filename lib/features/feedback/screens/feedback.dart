@@ -82,7 +82,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   },
                 )
               else
-                const UniqueProgressIndicator()
+                const CustomLoadingWidget()
             ],
           ),
         ),
@@ -95,8 +95,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title:  Padding(
-            padding: const EdgeInsets.only(top:12.0),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 12.0),
             child: Text(message, style: const TextStyle(fontSize: 20)),
           ),
           actions: [

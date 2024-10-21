@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -26,6 +27,7 @@ class CourseCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
+              colorFilter:ColorFilter.mode(AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light ? Colors.black : Colors.white,BlendMode.srcIn ) ,
               iconPath,
               width: 50,
               height: 50,

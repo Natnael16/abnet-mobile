@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/routes/paths.dart';
+import '../../../../core/shared_widgets/constrained_scaffold.dart';
 import '../../../../main.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -36,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         // );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed:')),
+          const SnackBar(content: Text('Login failed:')),
         );
       }
     } catch (error) {
@@ -61,13 +62,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: 30.h),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(

@@ -9,6 +9,7 @@ import 'core/injections/injection_container.dart';
 import 'core/routes/router_config.dart';
 import 'core/utils/bloc_observer.dart';
 import 'core/utils/theme.dart';
+import 'features/admin/presentation/bloc/upload/upload_bloc.dart';
 import 'features/courses/presentation/bloc/course/course_bloc.dart';
 import 'features/courses/presentation/bloc/media/media_bloc.dart';
 import 'features/courses/presentation/bloc/teachers/teachers_bloc.dart';
@@ -43,7 +44,8 @@ Future<void> main() async {
                     BlocProvider<CourseBloc>(create: (_) => CourseBloc()),
                     BlocProvider<TeachersBloc>(create: (_) => TeachersBloc()),
                     BlocProvider<TopicsBloc>(create: (_) => TopicsBloc()),
-                    BlocProvider<AudioBloc>(create: (_) => AudioBloc())
+                    BlocProvider<AudioBloc>(create: (_) => AudioBloc()),
+                    BlocProvider<UploadBloc>(create: (_) => UploadBloc())
                   ],
                   child: MyApp(),
                 ));
@@ -54,7 +56,6 @@ Future<void> main() async {
 //Global variables
 
 final supabase = Supabase.instance.client;
-// final FloatingAudioPlayer audioPlayer = FloatingAudioPlayer();
 
 final isLoggedIn =
     supabase.auth.currentSession != null; // Retrieve the current session data

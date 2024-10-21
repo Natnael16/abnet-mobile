@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/routes/paths.dart';
-import '../../../../core/shared_widgets/custom_drawer.dart';
+import '../../../../core/shared_widgets/constrained_scaffold.dart';
 import '../../../../core/shared_widgets/custom_textfield.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../../../core/utils/colors.dart';
@@ -72,14 +72,9 @@ class _TopicsPageState extends State<TopicsPage> {
           teacherId: widget.teacherId,
           superTopicId: widget.superTopicId,
         )),
-      child: Scaffold(
+      child: ConstrainedScaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text("ዜማ ያሬድ",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
-          centerTitle: true,
-        ),
-        drawer: const CustomDrawer(),
+        hasBack: true,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

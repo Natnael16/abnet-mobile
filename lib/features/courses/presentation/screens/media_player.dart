@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
+import '../../../../core/shared_widgets/custom_back_button.dart';
 import '../../../../core/utils/colors.dart';
 import '../../data/datasource/stream_and_cache_audio.dart';
 import '../../data/models/duration_state.dart';
@@ -117,10 +118,7 @@ class MediaPlayerPageState extends State<MediaPlayerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.media.title, style: const TextStyle(fontSize: 20)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const CustomBackButton(),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

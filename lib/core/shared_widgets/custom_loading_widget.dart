@@ -3,13 +3,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../utils/colors.dart';
 
-class UniqueProgressIndicator extends StatelessWidget {
+class CustomLoadingWidget extends StatelessWidget {
   final double size;
   final Color color;
   final double strokeWidth;
   final Duration duration;
 
-  const UniqueProgressIndicator({super.key, 
+  const CustomLoadingWidget({
+    super.key,
     this.size = 50.0,
     this.color = AppColors.primaryColor,
     this.strokeWidth = 3.0,

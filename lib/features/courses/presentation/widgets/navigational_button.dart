@@ -19,39 +19,39 @@ class NavigationalButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Card(
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-        decoration: BoxDecoration(
-          color: AppColors.defaultGrey,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: _getHighlightedText(title, searchQuery),
-              ),
-            ),
-            suffix ??
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.grey[400],
+        child: Padding(
+          padding:  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: _getHighlightedText(title, searchQuery,context),
                 ),
-          ],
+              ),
+              suffix ??
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.grey[400],
+                  ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   // Method to get the highlighted text as a list of TextSpan
-  List<TextSpan> _getHighlightedText(String title, String query) {
+  List<TextSpan> _getHighlightedText(String title, String query,BuildContext context) {
     if (query.isEmpty) {
       return [
         TextSpan(
-            text: title,
-            style: const TextStyle(fontSize: 16, color: AppColors.textBlack))
+          text: title,
+          style:  Theme.of(context).textTheme.bodySmall,
+
+        )
       ];
     }
 
@@ -70,7 +70,9 @@ class NavigationalButton extends StatelessWidget {
       spans.add(TextSpan(
           text: match.group(0),
           style: const TextStyle(
-              color: AppColors.primaryColor,fontSize:16, fontWeight: FontWeight.bold)));
+              color: AppColors.primaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.bold)));
       lastMatchEnd = match.end;
     }
 

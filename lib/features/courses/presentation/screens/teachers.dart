@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/routes/paths.dart';
-import '../../../../core/shared_widgets/custom_drawer.dart';
+import '../../../../core/shared_widgets/constrained_scaffold.dart';
 import '../../../../core/shared_widgets/custom_textfield.dart';
 import '../../../../core/shared_widgets/no_data_reload.dart';
 import '../../../../core/utils/images.dart';
@@ -52,83 +52,75 @@ class _TeachersPageState extends State<TeachersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("ዜማ ያሬድ",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
-        centerTitle: true,
-      ),
-      drawer: const CustomDrawer(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 16),
-            IntroText(title: widget.courseTitle),
-            const SizedBox(height: 16),
-            SearchTextField(
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(right: 6.0),
-                child: SvgPicture.asset(AppImages.searchIcon,
-                    width: 22, height: 22),
-              ),
-              controller: searchController,
+    return ConstrainedScaffold(
+      hasBack: true,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IntroText(title: widget.courseTitle),
+          const SizedBox(height: 16),
+          SearchTextField(
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: SvgPicture.asset(AppImages.searchIcon,
+                  width: 22, height: 22),
             ),
-            const SizedBox(height: 16),
-            BlocConsumer<TeachersBloc, TeachersState>(
-              listener: (context, state) {
-                if (state is TeachersSuccess) {
-                  setState(() {
-                    allTeachers = state.teachers;
-                    filteredTeachers = allTeachers;
-                  });
-                }
-              },
-              builder: (context, state) {
-                if (state is TeachersLoading) {
-                  return const ShimmerList();
-                } else if (state is TeachersSuccess) {
-                  return ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: filteredTeachers.isNotEmpty
-                        ? filteredTeachers.length
-                        : 1,
-                    itemBuilder: (context, index) {
-                      if (filteredTeachers.isEmpty) {
-                        return NoDataReload(
-                          onPressed: () {
-                            BlocProvider.of<TeachersBloc>(context).add(
-                                GetTeachersEvent(courseId: widget.courseId));
-                          },
-                        );
-                      }
-                      final teacher = filteredTeachers[index];
-                      return NavigationalButton(
-                        title: teacher.name, // Use the original title
+            controller: searchController,
+          ),
+          const SizedBox(height: 16),
+          BlocConsumer<TeachersBloc, TeachersState>(
+            listener: (context, state) {
+              if (state is TeachersSuccess) {
+                setState(() {
+                  allTeachers = state.teachers;
+                  filteredTeachers = allTeachers;
+                });
+              }
+            },
+            builder: (context, state) {
+              if (state is TeachersLoading) {
+                return const ShimmerList();
+              } else if (state is TeachersSuccess) {
+                return ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: filteredTeachers.isNotEmpty
+                      ? filteredTeachers.length
+                      : 1,
+                  itemBuilder: (context, index) {
+                    if (filteredTeachers.isEmpty) {
+                      return NoDataReload(
                         onPressed: () {
-                          context.push(AppPaths.topics, extra: {
-                            'courseId': widget.courseId,
-                            "title": teacher.name,
-                            "teacherId": teacher.id,
-                          });
+                          BlocProvider.of<TeachersBloc>(context).add(
+                              GetTeachersEvent(courseId: widget.courseId));
                         },
-                        searchQuery: searchController
-                            .text, // Pass the search query for highlighting
                       );
-                    },
-                  );
-                }
-                return NoDataReload(
-                  onPressed: () {
-                    BlocProvider.of<TeachersBloc>(context)
-                        .add(GetTeachersEvent(courseId: widget.courseId));
+                    }
+                    final teacher = filteredTeachers[index];
+                    return NavigationalButton(
+                      title: teacher.name, // Use the original title
+                      onPressed: () {
+                        context.push(AppPaths.topics, extra: {
+                          'courseId': widget.courseId,
+                          "title": teacher.name,
+                          "teacherId": teacher.id,
+                        });
+                      },
+                      searchQuery: searchController
+                          .text, // Pass the search query for highlighting
+                    );
                   },
                 );
-              },
-            )
-          ],
-        ),
+              }
+              return NoDataReload(
+                onPressed: () {
+                  BlocProvider.of<TeachersBloc>(context)
+                      .add(GetTeachersEvent(courseId: widget.courseId));
+                },
+              );
+            },
+          )
+        ],
       ),
     );
   }

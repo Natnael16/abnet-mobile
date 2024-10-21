@@ -3,21 +3,23 @@ import 'dart:typed_data';
 
 import 'package:abnet_mobile/core/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import '../../../../core/shared_widgets/custom_drawer.dart';
+import '../../../../core/shared_widgets/constrained_scaffold.dart';
+import '../../../../core/shared_widgets/custom_loading_widget.dart';
 import '../../../../core/shared_widgets/custom_round_button.dart';
-import '../../../../core/utils/supabase_bucket.dart';
+import '../../../../core/shared_widgets/toasts.dart';
 import '../../../../core/utils/colors.dart';
 import '../../../../core/utils/file_uploader_service.dart';
 import '../../../courses/data/datasource/courses_datasource.dart';
-import '../../../courses/data/datasource/media_datasource.dart';
 import '../../../courses/data/datasource/teachers_datasource.dart';
 import '../../../courses/data/datasource/topics_datasource.dart';
 import '../../../courses/data/models/course.dart';
 import '../../../courses/data/models/teacher.dart';
 import '../../../courses/data/models/topic.dart';
+import '../bloc/upload/upload_bloc.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/upload_section.dart';
 
@@ -32,19 +34,18 @@ class AdminPageState extends State<AdminPage> {
   // Dropdown selections
   Course? selectedCourseType;
   Teacher? selectedTeacher;
-  Topic? selectedSection;
-  List<Topic?> subTopics = [];
+  Topic? selectedTopic;
+  List<Topic> subTopics = [];
   int maxSubTopics = 4;
 
   // Updated lists to use Course, Teacher, and Topic classes
   List<Course> courseTypes = [];
   List<Teacher> teachers = [];
-  List<Topic> sections = [];
-  List<Topic> subSections = [];
+  List<Topic> topics = [];
   List<String> docTypes = SUPPORTED_DOC_TYPES;
   List<String> mediaTypes = SUPPORTED_MEDIA_TYPES;
-  Map<String,dynamic>? uploadedDocumentFileInfo;
-  Map<String,dynamic>? uploadedMediaFileInfo;
+  Map<String, dynamic>? uploadedDocumentFileInfo;
+  Map<String, dynamic>? uploadedMediaFileInfo;
 
   // Fetch data for dropdowns
   @override
@@ -57,11 +58,11 @@ class AdminPageState extends State<AdminPage> {
     try {
       courseTypes = await getCourses();
       teachers = await getTeachers();
-      sections = await getAllTopics();
+      topics = await getAllTopics();
       setState(() {
         selectedCourseType = courseTypes.first;
         selectedTeacher = teachers.first;
-        selectedSection = sections.first;
+        selectedTopic = topics.first;
       });
     } catch (e) {
       debugPrint("Error initializing dropdowns: $e");
@@ -69,11 +70,12 @@ class AdminPageState extends State<AdminPage> {
     setState(() {}); // Refresh the UI with the fetched data
   }
 
-  Future<void> onSubmit() async {
+  void onSubmit() {
     if (selectedCourseType == null ||
         selectedTeacher == null ||
-        selectedSection == null ||
-        uploadedMediaFileInfo == null) {
+        selectedTopic == null ||
+        uploadedMediaFileInfo == null 
+        ) {
       Fluttertoast.showToast(
           webShowClose: true,
           msg: "ሁሉንም አስፈላጊ መረጃ አስገብተው እንደገና ይሞክሩ",
@@ -81,43 +83,19 @@ class AdminPageState extends State<AdminPage> {
           webBgColor: AppColors.bgErrorColor);
       return;
     }
-    String? docUrl;
-    if(uploadedDocumentFileInfo != null) {
-      docUrl = await supabaseUpload(
-            uploadedDocumentFileInfo?['file'],
-            uploadedDocumentFileInfo?['name'],
-            'abnet-media-storage');
-    }
-    
-
-    String? mediaUrl = await supabaseUpload(uploadedMediaFileInfo?['file'],
-        uploadedMediaFileInfo!['name'], 'abnet-media-storage');
-
-    bool result = await createDocument(
-        selectedCourseType!,
-        selectedTeacher!,
-        selectedSection!,
-        subSections,
-        docUrl,
-        mediaUrl!);
-    if (result) {
-      Fluttertoast.showToast(
-          webShowClose: true,
-          msg: "መረጃው በተሳካ ሁኔታ ተመዝግቧል",
-          timeInSecForIosWeb: 10);
-    } else {
-      Fluttertoast.showToast(
-          webShowClose: true,
-          msg: "መመዝገብ አልተቻለም እባክዎ እንደገና ይሞክሩ",
-          timeInSecForIosWeb: 10,
-          webBgColor: AppColors.bgErrorColor);
-    }
+    BlocProvider.of<UploadBloc>(context).add(UploadEvent(
+        course: selectedCourseType!,
+        teacher: selectedTeacher!,
+        topic: selectedTopic!,
+        topics: subTopics,
+        document: uploadedDocumentFileInfo,
+        media: uploadedMediaFileInfo!));
   }
 
   void _addSubtopic() {
     if (subTopics.length < maxSubTopics) {
       setState(() {
-        subTopics.add(sections[0]);
+        subTopics.add(topics[0]);
       });
     }
   }
@@ -194,10 +172,10 @@ class AdminPageState extends State<AdminPage> {
       Topic? newTopic = await createTopic(topicTitle);
       if (newTopic != null) {
         setState(() {
-          sections.add(newTopic);
+          topics.add(newTopic);
           if (subTopicIndex != null) {
           } else {
-            selectedSection = newTopic;
+            selectedTopic = newTopic;
           }
         });
         Fluttertoast.showToast(
@@ -266,8 +244,6 @@ class AdminPageState extends State<AdminPage> {
           await FilePickerService.getFile(allowedExtensions: allowedExtensions);
 
       if (fileDict != null && fileDict['file'] is Uint8List) {
-        // Web: Handle Uint8List (bytes)
-        
         setState(() {
           if (type == 'doc') {
             uploadedDocumentFileInfo = fileDict;
@@ -277,7 +253,7 @@ class AdminPageState extends State<AdminPage> {
         });
       } else if (fileDict != null && fileDict['file'] is io.File) {
         // Mobile/Desktop: Handle File object
-        
+
         setState(() {
           if (type == 'doc') {
             uploadedDocumentFileInfo;
@@ -293,13 +269,7 @@ class AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("ዜማ ያሬድ",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
-        centerTitle: true,
-      ),
-      drawer: const CustomDrawer(),
+    return ConstrainedScaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
         child: SingleChildScrollView(
@@ -344,11 +314,11 @@ class AdminPageState extends State<AdminPage> {
               // Dropdown for sections
               dropdownField(
                 'ክፍል',
-                selectedSection,
-                sections,
+                selectedTopic,
+                topics,
                 (newValue) {
                   setState(() {
-                    selectedSection = newValue as Topic;
+                    selectedTopic = newValue as Topic;
                   });
                 },
                 () => _addNewItemDialog("ክፍል"),
@@ -363,7 +333,7 @@ class AdminPageState extends State<AdminPage> {
                       dropdownField(
                         'ንዑስ ክፍል ${index + 1}',
                         subTopics[index],
-                        sections,
+                        topics,
                         (newValue) {
                           setState(() {
                             subTopics[index] = newValue as Topic;
@@ -393,7 +363,7 @@ class AdminPageState extends State<AdminPage> {
               ),
               SizedBox(height: 2.h),
               Text(
-                '${selectedCourseType?.title ?? ""} -> ${selectedTeacher?.name ?? ""} -> ${selectedSection?.title ?? ""} -> ${subTopics.map((obj) => obj?.title).join(' -> ')}',
+                '${selectedCourseType?.title ?? ""} -> ${selectedTeacher?.name ?? ""} -> ${selectedTopic?.title ?? ""} -> ${subTopics.map((obj) => obj?.title).join(' -> ')}',
                 style: TextStyle(fontSize: 16.sp),
               ),
               SizedBox(height: 3.h),
@@ -414,7 +384,22 @@ class AdminPageState extends State<AdminPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CustomRoundButton(buttonText: "መዝግብ", onPressed: onSubmit)
+                  BlocConsumer<UploadBloc, UploadState>(
+                    listener: (context, state) {
+                      if (state is UploadFailure) {
+                        errorSavingToast();
+                      } else if (state is UploadSuccess) {
+                        savedSuccessToast();
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is UploadLoading) {
+                        return const CustomLoadingWidget();
+                      }
+                      return CustomRoundButton(
+                          buttonText: "መዝግብ", onPressed: onSubmit);
+                    },
+                  )
                 ],
               ),
             ],
